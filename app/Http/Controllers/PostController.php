@@ -28,6 +28,10 @@ class PostController extends Controller
      */
     public function create()
     {
+        // if (!auth()->check()) {
+        //     //abort(403);
+        //     return to_route('login');
+        // }
         return view('posts.create');
     }
 
@@ -36,6 +40,7 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
+
         //dd($request);
         $validated = $request->validate([
             //'title' => 'required|max:255',
