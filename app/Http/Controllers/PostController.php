@@ -53,7 +53,9 @@ class PostController extends Controller
         //     'title' => $request->title,
         //     'content' => $request->content,
         // ]);
-        Post::create($validated);
+        $validated['user_id'] = auth()->id();
+        //Post::create($validated);
+        auth()->user()->posts()->create($validated);
         //return redirect()->route('posts.index');
         return to_route('posts.index');
     }
@@ -73,6 +75,9 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
+        if ($post->user_id != auth()->id()) {
+            abort(403);
+        }
         return view('posts.edit', ['post' => $post]);
     }
 
@@ -88,6 +93,7 @@ class PostController extends Controller
 
         $post->update($validated);
         return to_route('posts.index');
+        //return to_route('posts.show', ['post'=> $post]);
 
     }
 
