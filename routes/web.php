@@ -13,6 +13,14 @@ Route::middleware('auth')->group(function () {
     Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/post/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::post('/logout', [LoginUserController::class, 'logout'])->name('logout');
+//
+//    Route::get('/admin', function (){
+//        return 'You are logged in as an admin';
+//    })->middleware('can:is-admin')->name('admin');
+//
+    Route::get('/admin', function (){
+        return 'You are logged in as an admin';
+    })->can('is-admin')->name('admin');
 });
 
 // //Route::resource('/posts', PostController::class)->middleware('auth');
