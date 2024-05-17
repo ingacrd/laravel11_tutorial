@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminPostController;
 use App\Http\Controllers\LoginUserController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\RegisterUserController;
@@ -15,8 +16,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/post/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::post('/logout', [LoginUserController::class, 'logout'])->name('logout');
-   Route::get('/admin', [AdminController::class, 'index'])->middleware('is-admin')->name('admin');
-//
+    Route::middleware('is-admin')->group(function(){
+        Route::get('/admin', [AdminController::class, 'index'])->name('admin');
+        Route::get('/admin/post/{post}/edit', [AdminPostController::class, 'edit'])->name('admin.posts.edit');
+        Route::put('/admin/post/{post}', [AdminPostController::class, 'update'])->name('admin.posts.update');
+        Route::delete('/admin/post/{post}', [AdminPostController::class, 'destroy'])->name('admin.posts.destroy');
+    });
+
+
+    //
 //    Route::get('/admin', function (){
 //        return 'You are logged in as an admin';
 //    })->middleware('can:is-admin')->name('admin');
