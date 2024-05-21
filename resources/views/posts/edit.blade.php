@@ -6,7 +6,7 @@
                 <span class="text-red-500">{{ $error }}</span>
             @endforeach
         @endif --}}
-        <form method="POST" action="{{ route('posts.update', $post->id) }}">
+        <form method="POST" action="{{ route('posts.update', $post->id) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="mb-6">
@@ -35,6 +35,20 @@
                     placeholder="Write your thoughts here...">{{ old('content', $post->content) }}</textarea>
                 @error('content')
                     <span class="text-red-500 text=sm">{{ $message }}</span>
+                @enderror
+            </div>
+            <div class="mb-6">
+
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                       for="file_input">
+                    Thumbnail
+                </label>
+                <input class="block w-full text-sm text-gray-900 border
+                border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400
+                focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                       id="thumbnail" type="file" name="thumbnail">
+                @error('thumbnail')
+                <span class="text-red-500 text=sm">{{ $message }}</span>
                 @enderror
             </div>
             <div class="mb-6">
