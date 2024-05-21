@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
 
 class PostController extends Controller
@@ -48,13 +49,15 @@ class PostController extends Controller
             'title' => ['required', 'max:255', 'min:5'],
             //'content' => 'required',
             'content' => ['required', 'min:10'],
+            'thumbnail' => ['required','image'],
         ]);
 
         // Post::create([
         //     'title' => $request->title,
         //     'content' => $request->content,
         // ]);
-        $validated['user_id'] = auth()->id();
+        //$validated['user_id'] = auth()->id();
+        $validated['thumbnail'] =$request->file('thumbnail')->store('thumbnails');
         //Post::create($validated);
         auth()->user()->posts()->create($validated);
         //return redirect()->route('posts.index');
@@ -92,7 +95,13 @@ class PostController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'max:255', 'min:5'],
             'content' => ['required', 'min:10'],
+            'thumbnail' => ['sometimes','image'],
         ]);
+
+        if($request->hasFile('thumbnail')){
+            File::delete(storage_path('app/public/'. $post->thumbnail));
+            $validated['thumbnail'] =$request->file('thumbnail')->store('thumbnails');
+        }
 
         $post->update($validated);
         return to_route('posts.index');
@@ -106,6 +115,7 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         Gate::authorize('delete', $post);
+        File::delete(storage_path('app/public/'. $post->thumbnail));
         $post->delete();
         return to_route('posts.index');
     }
