@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\PostMail;
+use App\Jobs\SendNewPostMailJob;
+//use App\Mail\PostMail;
 use App\Models\Post;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
+//use Illuminate\Support\Facades\Mail;
 
 class PostController extends Controller
 {
@@ -21,7 +24,19 @@ class PostController extends Controller
         // $name = 'Alfred';
         // $age = 32;
         // $posts = ['post 1', 'post 2', 'post 3'];
-        $posts = Post::all();
+        //$posts = Post::all();
+//        if(Cache::has('posts')){
+//            $posts = Cache::get('posts');
+//        } else {
+//            sleep(4);
+//            $posts = Post::paginate(6);
+//            Cache::put('posts', $posts,10);
+//        }
+
+        $posts = Cache::remember('posts',10, function () {
+            sleep(4);
+            return Post::paginate(6);
+        });
         // return view('posts.index', ['username' => $name, 'age' => $age, 'posts' => $posts]);
         return view('posts.index', ['posts' => $posts]);
 
@@ -62,9 +77,10 @@ class PostController extends Controller
         $validated['thumbnail'] =$request->file('thumbnail')->store('thumbnails');
         //Post::create($validated);
         auth()->user()->posts()->create($validated);
-        Mail::to(auth()->user()->email)->send(new PostMail(['name'=>'Tony', 'title'=>$validated['title']]));
+        dispatch(new SendNewPostMailJob(['email'=>auth()->user()->email, 'name'=>auth()->user()->name, 'title'=> $validated['title']]));
+        //Mail::to(auth()->user()->email)->send(new PostMail(['name'=>'Tony', 'title'=>$validated['title']]));
         //return redirect()->route('posts.index');
-        return to_route('posts.index');
+        return to_route('posts.index')->with('message', "Post created succesfully.");
     }
 
     /**
@@ -73,8 +89,13 @@ class PostController extends Controller
     //public function show($id)
     public function show(Post $post)
     {
-        //$post = Post::findOrFail($id);
+        //try {
+            //$post = Post::findOrFail($id);
         return view('posts.show', ['post' => $post]);
+        //} catch (ModelNotFoundException $e) {
+            //return $e->getMessage();
+            //dd($e);
+        //}
     }
 
     /**
@@ -107,8 +128,8 @@ class PostController extends Controller
         }
 
         $post->update($validated);
-        return to_route('posts.index');
-        //return to_route('posts.show', ['post'=> $post]);
+        //return to_route('posts.index');
+        return to_route('posts.show', ['post'=> $post])->with('message', "Post updated successfully");
 
     }
 
