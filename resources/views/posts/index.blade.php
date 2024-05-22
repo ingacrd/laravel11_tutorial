@@ -1,4 +1,5 @@
 <x-layout>
+
     <x-header>Posts Index</x-header>
     @auth
         <section>
@@ -32,5 +33,6 @@
                 </a>
             </div>
         @endforeach
+        <div class="mt-6">{{$posts->links()}}</div>
     </div>
 </x-layout>
